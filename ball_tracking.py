@@ -1,9 +1,8 @@
 from collections import deque
-from imutils.video import VideoStream
+from imutils.video import VideoStream # I don't like this.
 import numpy as np
 import argparse
 import cv2
-import imutils
 import time
 
 # Parse arguemens
@@ -33,9 +32,45 @@ while True:
 
     frame = frame[1] if args.get("video", False) else frame
 
-
+    # Stop if frame is empty. Could mean that the cam was stopped.
     if frame is None:
         break
+
+    # Resizing the frame to make it less resource internsive.
+    frame = mutils.resize(frame, 600) # Want to make it use normal resizing methods.
+    # Blur to reduce noise.
+    blurred = cv2.GaussianBlur(frame, (11,11), 0)
+
+    # Converting to HSV space. Hue is useful to differentiate colours.
+    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
+    # Returns a binary mask of the image. Puts '1' for indexes that are within range.
+    mask = cv2.inRange(hsv, upper_boundary, lower_boundary)
+
+    # Removes any small particles that are left by inRange.
+    mask = cv2.erode(mask, None, iterations = 2)
+    mark = cv2.dilate(mask, None, iterations = 2)
+
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    center = None
+
+
+    if len(cnts) > 0:
+        # Find the largest contour.
+        c = max(cnts, key=cv2.contourArea)
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        M = cv2.moments(c)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+        # Only proceed if the radius is over the minimum size.
+        if radius > 10:
+            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+            cv2.circle(frame, center, 5, (0, 255, 255), -1)
+
+    pts.append(center)
+
+
 
 
 

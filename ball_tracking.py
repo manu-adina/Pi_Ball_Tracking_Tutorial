@@ -1,5 +1,6 @@
 from collections import deque
 from imutils.video import VideoStream # I don't like this.
+import imutils
 import numpy as np
 import argparse
 import cv2
@@ -24,7 +25,7 @@ else:
     vs = cv2.VideoCapture(args["video"])
 
 # Allow some time for the cam
-time.sleep(2.0)
+time.sleep(1.0)
 
 while True:
     # Get current frame
@@ -37,7 +38,7 @@ while True:
         break
 
     # Resizing the frame to make it less resource internsive.
-    frame = mutils.resize(frame, 600) # Want to make it use normal resizing methods.
+    frame = imutils.resize(frame, width=600) # Want to make it use normal resizing methods.
     # Blur to reduce noise.
     blurred = cv2.GaussianBlur(frame, (11,11), 0)
 
@@ -45,7 +46,7 @@ while True:
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
     # Returns a binary mask of the image. Puts '1' for indexes that are within range.
-    mask = cv2.inRange(hsv, upper_boundary, lower_boundary)
+    mask = cv2.inRange(hsv, lower_boundary, upper_boundary)
 
     # Removes any small particles that are left by inRange.
     mask = cv2.erode(mask, None, iterations = 2)
@@ -68,14 +69,14 @@ while True:
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 255, 255), -1)
 
-    pts.append(center)
+    pts.appendleft(center)
 
     for i in range(1, len(pts)):
         if pts[i - 1] is None or pts[i] is None:
             continue
 
         thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-        cv2.line(frame, pts[i - 1], pts[i] (0,0,255), thickness)
+        cv2.line(frame, pts[i - 1], pts[i], (0,0,255), thickness)
 
 
     cv2.imshow("Frame", frame)
@@ -92,10 +93,5 @@ else:
     vs.release()
 
 cv2.destroyAllWindows()
-
-
-
-
-
 
 

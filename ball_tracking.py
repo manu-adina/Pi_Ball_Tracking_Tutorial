@@ -13,8 +13,8 @@ ap.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
 args = vars(ap.parse_args())
 
 # Upper and lower bounderies for the green colour.
-upper_boundary = (29, 86, 6)
-lower_boundary = (64, 255, 255)
+lower_boundary = (26, 86, 6)
+upper_boundary = (71, 255, 255)
 
 pts = deque(maxlen=args["buffer"])
 
@@ -38,7 +38,7 @@ while True:
         break
 
     # Resizing the frame to make it less resource internsive.
-    frame = imutils.resize(frame, width=600) # Want to make it use normal resizing methods.
+    # frame = imutils.resize(frame, width=600) # Want to make it use normal resizing methods.
     # Blur to reduce noise.
     blurred = cv2.GaussianBlur(frame, (11,11), 0)
 
